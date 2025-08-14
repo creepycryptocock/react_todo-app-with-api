@@ -1,5 +1,6 @@
 import { Todo } from '../types/Todo';
 import { Filter } from '../types/Filter';
+import React from 'react';
 
 type Props = {
   todos: Todo[];
