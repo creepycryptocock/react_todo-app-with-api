@@ -48,6 +48,14 @@ export const App: React.FC = () => {
       .finally(() => setIsLoading(false));
   }, []);
 
+   const startEditing = (todoId: number) => {
+    setEditingTodoId(todoId);
+  };
+
+  const cancelEditing = () => {
+    setEditingTodoId(null);
+  };
+
   const handleAddTodo = async (title: string) => {
     if (!title.trim()) {
       setError('Title should not be empty');
@@ -181,18 +189,59 @@ export const App: React.FC = () => {
     }
   };
 
+  // const renameTodo = async (todoId: number, title: string) => {
+  //   const trimmedTitle = title.trim();
+
+  //   if (!trimmedTitle) {
+  //     deleteTodo(todoId);
+
+  //     return;
+  //   }
+
+  //   const currentTodo = todos.find(todo => todo.id === todoId);
+
+  //   if (!currentTodo || currentTodo.title === trimmedTitle) {
+  //     return;
+  //   }
+
+  //   try {
+  //     setUpdatingTodoIds(todoIds => [...todoIds, todoId]);
+  //     await todoService.updateTitle(todoId, trimmedTitle);
+
+  //     setTodos(currentTodos =>
+  //       currentTodos.map(todo =>
+  //         todo.id === todoId ? { ...todo, title: trimmedTitle } : todo,
+  //       ),
+  //     );
+  //   } catch {
+  //     setError('Unable to update a todo');
+  //     setEditingTodoId(todoId);
+  //   } finally {
+  //     setUpdatingTodoIds(ids => ids.filter(id => id !== todoId));
+  //   }
+  // };
+
   const renameTodo = async (todoId: number, title: string) => {
     const trimmedTitle = title.trim();
 
     if (!trimmedTitle) {
-      deleteTodo(todoId);
-
+      try {
+        setDeletingTodoIds(ids => [...ids, todoId]);
+        await todoService.deleteTodo(todoId);
+        setTodos(prevTodos => prevTodos.filter(t => t.id !== todoId));
+        cancelEditing();
+      } catch {
+        setError('Unable to delete a todo');
+      } finally {
+        setDeletingTodoIds(ids => ids.filter(id => id !== todoId));
+      }
       return;
     }
 
     const currentTodo = todos.find(todo => todo.id === todoId);
 
     if (!currentTodo || currentTodo.title === trimmedTitle) {
+      cancelEditing();
       return;
     }
 
@@ -205,24 +254,28 @@ export const App: React.FC = () => {
           todo.id === todoId ? { ...todo, title: trimmedTitle } : todo,
         ),
       );
+
+      cancelEditing();
     } catch {
       setError('Unable to update a todo');
+      throw new Error('Update failed');
     } finally {
       setUpdatingTodoIds(ids => ids.filter(id => id !== todoId));
     }
   };
 
-  const startEditing = (todoId: number) => {
-    setEditingTodoId(todoId);
-  };
 
-  const cancelEditing = () => {
-    setEditingTodoId(null);
-  };
+  // const handleUpdateTodo = (todoId: number, title: string) => {
+  //   renameTodo(todoId, title);
+  //   cancelEditing();
+  // };
 
-  const handleUpdateTodo = (todoId: number, title: string) => {
-    renameTodo(todoId, title);
-    cancelEditing();
+  const handleUpdateTodo = async (todoId: number, title: string) => {
+    try {
+      await renameTodo(todoId, title);
+    } catch {
+      setError('Unable to update a todo');
+    }
   };
 
   if (!todoService.USER_ID) {
