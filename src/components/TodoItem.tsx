@@ -23,7 +23,7 @@ export const TodoItem: React.FC<Props> = ({
   cancelEditing,
   updateTodo,
 }) => {
-  const [editingTitle, setEditingTitle] = useState('');
+  const [editingTitle, setEditingTitle] = useState(todo.title);
   const refInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
