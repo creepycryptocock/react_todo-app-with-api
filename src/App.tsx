@@ -48,7 +48,7 @@ export const App: React.FC = () => {
       .finally(() => setIsLoading(false));
   }, []);
 
-   const startEditing = (todoId: number) => {
+  const startEditing = (todoId: number) => {
     setEditingTodoId(todoId);
   };
 
@@ -125,6 +125,8 @@ export const App: React.FC = () => {
     setDisabled(true);
     const completedTodos = getFilteredTodos(todos, Filter.Completed);
 
+    setDeletingTodoIds(completedTodos.map(todo => todo.id));
+
     const results = await Promise.allSettled(
       completedTodos.map(todo => todoService.deleteTodo(todo.id)),
     );
@@ -136,6 +138,8 @@ export const App: React.FC = () => {
     setTodos(currentTodos =>
       currentTodos.filter(todo => !successfulIds.includes(todo.id)),
     );
+
+    setDeletingTodoIds([]);
 
     if (results.some(res => res.status === 'rejected')) {
       setError('Unable to delete a todo');
@@ -235,6 +239,7 @@ export const App: React.FC = () => {
       } finally {
         setDeletingTodoIds(ids => ids.filter(id => id !== todoId));
       }
+
       return;
     }
 
@@ -242,6 +247,7 @@ export const App: React.FC = () => {
 
     if (!currentTodo || currentTodo.title === trimmedTitle) {
       cancelEditing();
+
       return;
     }
 
@@ -263,7 +269,6 @@ export const App: React.FC = () => {
       setUpdatingTodoIds(ids => ids.filter(id => id !== todoId));
     }
   };
-
 
   // const handleUpdateTodo = (todoId: number, title: string) => {
   //   renameTodo(todoId, title);
