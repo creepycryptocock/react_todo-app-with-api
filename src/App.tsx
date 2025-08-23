@@ -150,7 +150,7 @@ export const App: React.FC = () => {
 
   const toggleAll = async () => {
     try {
-      const allCompleted = todos.every(todo => todo.completed);
+      const allCompleted = todos.every(todo_ => todo_.completed);
       const targetState = !allCompleted; // false = uncomplete all, true = complete all
 
       const todosToUpdate = todos.filter(
